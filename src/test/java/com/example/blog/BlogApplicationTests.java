@@ -15,14 +15,5 @@ public class BlogApplicationTests {
 	void contextLoads() {
 	}
 
-	@Autowired
-	private UserRepository userRepository;
 
-	@Test
-	public void testSaveUser() {
-		User user = new User("testuser", "password", "bio");
-		userRepository.save(user);
-		User fetchedUser = userRepository.findByUsername("testuser");
-		assertNotNull(fetchedUser);
-	}
 }

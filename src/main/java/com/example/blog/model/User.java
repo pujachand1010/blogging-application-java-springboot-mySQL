@@ -1,6 +1,7 @@
 package com.example.blog.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -18,15 +19,18 @@ public class User {
 
     private String bio;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Post> posts;  // Bidirectional relationship with Post
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Post> posts = new HashSet<>();  // Initialize the Set
 
+    // Default constructor for JPA
+    protected User() {
+    }
 
-    // Constructor with required fields
+    // Constructor with parameters
     public User(String username, String password, String bio) {
         this.username = username;
         this.password = password;
-        this.bio = bio;  // Set to null if not provided
+        this.bio = bio;
     }
 
     // Getters and setters
@@ -63,10 +67,20 @@ public class User {
     }
 
     public Set<Post> getPosts() {
-        return posts;
+        return new HashSet<>(posts);  // Return a copy to avoid external modifications
     }
 
     public void setPosts(Set<Post> posts) {
-        this.posts = posts;
+        this.posts = new HashSet<>(posts);  // Use a copy to avoid external modifications
+    }
+
+    public void addPost(Post post) {
+        posts.add(post);
+        post.setAuthor(this);
+    }
+
+    public void removePost(Post post) {
+        posts.remove(post);
+        post.setAuthor(null);
     }
 }

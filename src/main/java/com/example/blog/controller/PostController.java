@@ -2,6 +2,7 @@ package com.example.blog.controller;
 
 import com.example.blog.exception.PostNotFoundException;
 import com.example.blog.model.Post;
+import com.example.blog.model.User;
 import com.example.blog.service.PostServiceImpl;
 import com.example.blog.service.UserServiceImpl;
 
@@ -28,14 +29,21 @@ public class PostController {
     @Autowired
     private UserServiceImpl userService;
 
-    @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody Post post) {
-        if (post.getTitle() == null || post.getContent() == null || post.getAuthor().getUserId() == null) {
+    @PostMapping("/create")
+    public ResponseEntity<Post> createPost(@RequestBody Post post, String authorName) {
+        if (post.getTitle() == null || post.getContent() == null || authorName == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        try{
+            User author = userService.getUserByUsername(authorName);
+            post.setAuthor(author);
+            Post savedPost = postService.createPost(post);
+            return ResponseEntity.ok(savedPost);
+        }catch (Exception e) {
+            e.printStackTrace(); // Log the exception for debugging
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-        Post savedPost = postService.createPost(post);
-        return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -46,7 +54,7 @@ public class PostController {
     }
 
 
-    @GetMapping("/posts")
+    @GetMapping
     public ResponseEntity<Page<Post>> getAllPosts(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
@@ -59,14 +67,15 @@ public class PostController {
         }
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<Post>> getPostsByUserId(
-            @PathVariable Long userId,
+    @GetMapping("/user/{username}")
+    public ResponseEntity<Page<Post>> getPostsByUsername(
+            @PathVariable String username,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<Post> posts = postService.filterPostsByAuthor(userId, pageable);
+            User user = userService.getUserByUsername(username);
+            Page<Post> posts = postService.filterPostsByAuthor(user, pageable);
             return new ResponseEntity<>(posts, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -91,7 +100,7 @@ public class PostController {
     }
 
 
-    @PutMapping("/{id}")
+    @PutMapping("update/{id}")
     public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post post) {
         try {
             Post updatedPost = postService.updatePost(id, post);
@@ -103,7 +112,7 @@ public class PostController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("delete/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         try {
             postService.deletePost(id);

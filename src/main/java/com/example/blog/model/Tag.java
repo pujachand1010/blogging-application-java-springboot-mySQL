@@ -1,8 +1,8 @@
 package com.example.blog.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
-
 
 @Entity
 public class Tag {
@@ -14,15 +14,19 @@ public class Tag {
     @Column(nullable = false)
     private String keyword;
 
-    @ManyToMany(mappedBy = "tags")
-    private Set<Post> posts;
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
+    private Set<Post> posts = new HashSet<>();  // Initialize the Set
 
-    //constructor
+    // Default constructor for JPA
+    protected Tag() {
+    }
+
+    // Constructor with parameters
     public Tag(String keyword) {
         this.keyword = keyword;
     }
 
-    //getters and setters
+    // Getters and setters
     public Long getTagId() {
         return tagId;
     }
@@ -35,18 +39,15 @@ public class Tag {
         return keyword;
     }
 
-    public void setKeyword(String name) {
+    public void setKeyword(String keyword) {
         this.keyword = keyword;
     }
 
     public Set<Post> getPosts() {
-        return posts;
+        return new HashSet<>(posts);  // Return a copy to avoid external modifications
     }
 
     public void setPosts(Set<Post> posts) {
-        this.posts = posts;
+        this.posts = new HashSet<>(posts);  // Use a copy to avoid external modifications
     }
-
-
-
 }

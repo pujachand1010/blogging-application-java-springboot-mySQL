@@ -1,7 +1,8 @@
 package com.example.blog.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -11,7 +12,7 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;  // Reference to User entity
 
@@ -24,20 +25,21 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime creationDate;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "post_tags",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private Set<Tag> tags;
+    private Set<Tag> tags = new HashSet<>();  // Initialize the Set
 
-    // Default constructor
-    public Post() {}
+    // Default constructor for JPA
+    protected Post() {
+    }
 
-    // Constructor with required fields
+    // Constructor with parameters
     public Post(String title, String content, User author) {
         this.title = title;
         this.content = content;
-        this.author = author;  // Set the User entity directly
+        this.author = author;
         this.creationDate = LocalDateTime.now();
     }
 
@@ -83,10 +85,18 @@ public class Post {
     }
 
     public Set<Tag> getTags() {
-        return tags;
+        return new HashSet<>(tags);  // Return a copy to avoid external modifications
     }
 
     public void setTags(Set<Tag> tags) {
-        this.tags = tags;
+        this.tags = new HashSet<>(tags);  // Use a copy to avoid external modifications
+    }
+
+    public void addTag(Tag tag) {
+        tags.add(tag);
+    }
+
+    public void removeTag(Tag tag) {
+        tags.remove(tag);
     }
 }

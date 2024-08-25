@@ -2,6 +2,7 @@ package com.example.blog.service;
 
 import com.example.blog.exception.PostNotFoundException;
 import com.example.blog.model.Post;
+import com.example.blog.model.User;
 import com.example.blog.repository.PostRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<Post> filterPostsByAuthor(Long authorId, Pageable pageable) {
-        return postRepository.findByAuthorId(authorId, pageable);
+    public Page<Post> filterPostsByAuthor(User author, Pageable pageable) {
+        return postRepository.findByAuthor(author, pageable);
     }
 
     @Override
