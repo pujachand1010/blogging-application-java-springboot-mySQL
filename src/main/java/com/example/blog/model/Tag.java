@@ -1,5 +1,6 @@
 package com.example.blog.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,6 +16,7 @@ public class Tag {
     private String keyword;
 
     @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
+    @JsonBackReference
     private Set<Post> posts = new HashSet<>();  // Initialize the Set
 
     // Default constructor for JPA

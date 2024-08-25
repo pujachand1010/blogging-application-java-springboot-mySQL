@@ -1,8 +1,6 @@
 package com.example.blog.config;
 
 import com.example.blog.service.UserDetailsServiceImpl;
-
-import com.example.blog.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +11,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class SecurityConfig {
@@ -34,19 +35,10 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/logout").permitAll() // Allows access to login and logout pages without authentication
                         .anyRequest().permitAll() // Allows all other requests without authentication
                 )
-                .formLogin(form -> form
-                        .loginPage("/login") // Custom login page URL
-                        .permitAll() // Allows access to the login page without authentication
-                )
-                .logout(LogoutConfigurer::permitAll // Allows access to logout functionality without authentication
-                );
-
+                .httpBasic(withDefaults()) // Enable HTTP Basic Authentication
+                .logout(LogoutConfigurer::permitAll) // Allows access to logout functionality without authentication
+                .userDetailsService(userDetailsService); // Use the custom UserDetailsService
 
         return http.build();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return userDetailsService;
     }
 }

@@ -1,5 +1,7 @@
 package com.example.blog.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -14,6 +16,7 @@ public class Post {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
+    @JsonManagedReference
     private User author;  // Reference to User entity
 
     @Column(nullable = false, unique = true)
@@ -29,6 +32,7 @@ public class Post {
     @JoinTable(name = "post_tags",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    @JsonManagedReference
     private Set<Tag> tags = new HashSet<>();  // Initialize the Set
 
     // Default constructor for JPA

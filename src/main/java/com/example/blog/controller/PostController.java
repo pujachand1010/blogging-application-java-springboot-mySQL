@@ -13,9 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -24,27 +23,33 @@ import java.util.Optional;
 @RequestMapping("/posts")
 public class PostController {
 
+    private static final Logger log = LoggerFactory.getLogger(PostController.class);
+
     @Autowired
     private PostServiceImpl postService;
     @Autowired
     private UserServiceImpl userService;
 
+
     @PostMapping("/create")
-    public ResponseEntity<Post> createPost(@RequestBody Post post, String authorName) {
+    public ResponseEntity<Post> createPost(@RequestBody Post post, @RequestParam String authorName) {
         if (post.getTitle() == null || post.getContent() == null || authorName == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        try{
+        try {
             User author = userService.getUserByUsername(authorName);
+            if (author == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Or handle this case as needed
+            }
             post.setAuthor(author);
             Post savedPost = postService.createPost(post);
             return ResponseEntity.ok(savedPost);
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace(); // Log the exception for debugging
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
@@ -53,7 +58,6 @@ public class PostController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-
     @GetMapping
     public ResponseEntity<Page<Post>> getAllPosts(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -61,8 +65,10 @@ public class PostController {
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<Post> posts = postService.getAllPosts(pageable);
+            System.out.println("Posts retrieved: " + posts.getContent());
             return new ResponseEntity<>(posts, HttpStatus.OK);
         } catch (Exception e) {
+            log.error("Error getting all posts", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -78,6 +84,7 @@ public class PostController {
             Page<Post> posts = postService.filterPostsByAuthor(user, pageable);
             return new ResponseEntity<>(posts, HttpStatus.OK);
         } catch (Exception e) {
+            log.error("Error getting posts by username", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -95,12 +102,12 @@ public class PostController {
             Page<Post> posts = postService.filterPostsByDate(startDate, endDate, pageable);
             return new ResponseEntity<>(posts, HttpStatus.OK);
         } catch (Exception e) {
+            log.error("Error getting posts by date", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-
-    @PutMapping("update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post post) {
         try {
             Post updatedPost = postService.updatePost(id, post);
@@ -108,11 +115,12 @@ public class PostController {
         } catch (PostNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
+            log.error("Error updating post", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         try {
             postService.deletePost(id);
@@ -120,12 +128,8 @@ public class PostController {
         } catch (PostNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
+            log.error("Error deleting post", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
-
-
-
-
 }
