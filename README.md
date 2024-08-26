@@ -1,4 +1,4 @@
-<img width="905" alt="image" src="https://github.com/user-attachments/assets/4a5d0d2c-4f09-4408-8726-f3ec3660c758">**Overview**
+**Overview**
 
 This project is a RESTful API backend for a blogging platform, built with Java, Spring Boot, Maven, MySQL, and JPA. The API supports CRUD operations for posts, user management, and tagging. It includes authentication and authorization mechanisms, pagination, and filtering.
 
