@@ -1,5 +1,3 @@
-<img width="905" alt="image" src="https://github.com/user-attachments/assets/e1bc1283-cb16-4731-9ffa-6771694f075f">**Blogging Platform API
-**
 
 **Overview**
 
