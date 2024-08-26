@@ -1,10 +1,14 @@
 package com.example.blog.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Represents a user entity for the blog application.
+ */
 @Entity
 public class User {
 
@@ -21,11 +25,10 @@ public class User {
     private String bio;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonBackReference
     private Set<Post> posts = new HashSet<>();  // Initialize the Set
 
     // Default constructor for JPA
-    protected User() {
+    public User() {
     }
 
     // Constructor with parameters

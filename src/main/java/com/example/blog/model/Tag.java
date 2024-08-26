@@ -1,10 +1,15 @@
 package com.example.blog.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+
+/**
+ * Represents a tag entity which can be linked to a post.
+ */
 @Entity
 public class Tag {
 
@@ -15,12 +20,11 @@ public class Tag {
     @Column(nullable = false)
     private String keyword;
 
-    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
-    @JsonBackReference
-    private Set<Post> posts = new HashSet<>();  // Initialize the Set
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.EAGER)
+    private Set<Post> posts = new HashSet<>();
 
     // Default constructor for JPA
-    protected Tag() {
+    public Tag() {
     }
 
     // Constructor with parameters

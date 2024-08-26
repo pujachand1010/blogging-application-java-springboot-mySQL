@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
@@ -31,21 +32,23 @@ public class PostController {
     private UserServiceImpl userService;
 
 
-    @PostMapping("/create")
-    public ResponseEntity<Post> createPost(@RequestBody Post post, @RequestParam String authorName) {
-        if (post.getTitle() == null || post.getContent() == null || authorName == null) {
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<Post> createPost(@RequestParam("authorName") String authorName,
+                                           @RequestParam("title") String title,
+                                           @RequestParam("content") String content) {
+        if (title == null || content == null || authorName == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         try {
-            User author = userService.getUserByUsername(authorName);
+            User author = userService.getUserByUsername(authorName); // Get the author by username
             if (author == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Or handle this case as needed
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);  // Handle case where author is not found
             }
-            post.setAuthor(author);
-            Post savedPost = postService.createPost(post);
+
+            Post post = new Post(title, content, author);          // Create and save the new Post
+            Post savedPost = postService.createPost(post);         // Save the post
             return ResponseEntity.ok(savedPost);
         } catch (Exception e) {
-            e.printStackTrace(); // Log the exception for debugging
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -53,22 +56,20 @@ public class PostController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
-        Optional<Post> postOptional = postService.getPostById(id);
+        Optional<Post> postOptional = postService.getPostById(id);                   //Filter the posts by id
         return postOptional.map(post -> new ResponseEntity<>(post, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));        //Post not found
     }
 
     @GetMapping
     public ResponseEntity<Page<Post>> getAllPosts(
-            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "page", defaultValue = "0") int page,                //default page sizes for pagination
             @RequestParam(value = "size", defaultValue = "10") int size) {
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<Post> posts = postService.getAllPosts(pageable);
-            System.out.println("Posts retrieved: " + posts.getContent());
+            Page<Post> posts = postService.getAllPosts(pageable);                      //get all posts with paged result
             return new ResponseEntity<>(posts, HttpStatus.OK);
         } catch (Exception e) {
-            log.error("Error getting all posts", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -81,10 +82,9 @@ public class PostController {
         try {
             Pageable pageable = PageRequest.of(page, size);
             User user = userService.getUserByUsername(username);
-            Page<Post> posts = postService.filterPostsByAuthor(user, pageable);
+            Page<Post> posts = postService.filterPostsByAuthor(user, pageable);                 //get all posts with paged result
             return new ResponseEntity<>(posts, HttpStatus.OK);
         } catch (Exception e) {
-            log.error("Error getting posts by username", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -98,11 +98,10 @@ public class PostController {
         try {
             Pageable pageable = PageRequest.of(page, size);
             LocalDateTime startDate = LocalDateTime.parse(startDateStr);
-            LocalDateTime endDate = (endDateStr != null) ? LocalDateTime.parse(endDateStr) : LocalDateTime.now();
+            LocalDateTime endDate = (endDateStr != null) ? LocalDateTime.parse(endDateStr) : LocalDateTime.now();       //assign current date and time if no end end value is passed
             Page<Post> posts = postService.filterPostsByDate(startDate, endDate, pageable);
             return new ResponseEntity<>(posts, HttpStatus.OK);
         } catch (Exception e) {
-            log.error("Error getting posts by date", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -115,7 +114,6 @@ public class PostController {
         } catch (PostNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            log.error("Error updating post", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -128,7 +126,6 @@ public class PostController {
         } catch (PostNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            log.error("Error deleting post", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
