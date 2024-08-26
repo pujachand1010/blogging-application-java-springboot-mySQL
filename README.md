@@ -1,4 +1,4 @@
-**Overview**
+<img width="905" alt="image" src="https://github.com/user-attachments/assets/4a5d0d2c-4f09-4408-8726-f3ec3660c758">**Overview**
 
 This project is a RESTful API backend for a blogging platform, built with Java, Spring Boot, Maven, MySQL, and JPA. The API supports CRUD operations for posts, user management, and tagging. It includes authentication and authorization mechanisms, pagination, and filtering.
 
@@ -217,3 +217,25 @@ Delete a Tag
                 curl -X DELETE http://localhost:8080/tags/1
 
 Note: further optimizations could be added by using either a H2 server for faster access within small projects or by introducing the mapper classes and DTO objects for more smoothness.
+
+
+
+
+
+
+Screenshots for a couple of API functionalities-
+- Get posts by post id
+<img width="787" alt="image" src="https://github.com/user-attachments/assets/d9704169-49b7-4021-a24e-890c5022cc94">
+
+- Get posts by user (paged)
+<img width="882" alt="image" src="https://github.com/user-attachments/assets/cba87385-c81b-4c03-aa2b-8f35f9635e1e">
+
+- Get all posts with pagination
+<img width="905" alt="image" src="https://github.com/user-attachments/assets/1df2eb3f-4595-4cff-89e4-96e41edd7a07">
+
+- Get posts by post id (but unautorised access due to incorrect credentials)
+<img width="897" alt="image" src="https://github.com/user-attachments/assets/57f993ab-c051-40b5-bd11-55bca048c3a6">
+
+
+
+
